@@ -135,6 +135,26 @@ public:
         tmp *= lhs;
         return tmp;
     }
+    friend Polynomial operator+(const Polynomial& lhs, const Term& rhs) {
+        Polynomial tmp(lhs);
+        tmp += rhs;
+        return tmp;
+    }
+    friend Polynomial operator+(const Term& lhs, const Polynomial& rhs) {
+        Polynomial tmp(rhs);
+        tmp += lhs;
+        return tmp;
+    }
+    friend Polynomial operator-(const Polynomial& lhs, const Term& rhs) {
+        Polynomial tmp(lhs);
+        tmp -= rhs;
+        return tmp;
+    }
+    friend Polynomial operator-(const Term& lhs, const Polynomial& rhs) {
+        Polynomial tmp(rhs);
+        tmp += -lhs;
+        return tmp;
+    }
 
     bool Reduce(const Polynomial& other) {
         const Term& lead_term = other.GetLeadingTerm();

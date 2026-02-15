@@ -10,6 +10,8 @@ public:
 
     Monomial() = default;
     Monomial(std::initializer_list<Degree> degrees);
+    Monomial(const std::vector<Degree>& degrees);
+    Monomial(std::vector<Degree>&& degrees);
 
     Monomial(const Monomial&) = default;
     Monomial(Monomial&&) = default;

@@ -4,6 +4,10 @@
 namespace gb {
 Monomial::Monomial(std::initializer_list<Degree> degrees) : degrees_(degrees) {
 }
+Monomial::Monomial(const std::vector<Degree>& degrees) : degrees_(degrees) {
+}
+Monomial::Monomial(std::vector<Degree>&& degrees) : degrees_(std::move(degrees)) {
+}
 
 size_t Monomial::GetSize() const {
     return degrees_.size();
