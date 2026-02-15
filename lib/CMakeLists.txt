@@ -5,6 +5,7 @@ target_sources(groebner_basis_lib PRIVATE
     monomial.cpp
     term.cpp
     orderings.cpp
+    algo_utils.cpp
 )
 
 target_include_directories(groebner_basis_lib PUBLIC
