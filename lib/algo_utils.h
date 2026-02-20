@@ -26,4 +26,19 @@ void ReducePolynomialBySystem(Polynomial<Ordering>& to_reduce,
         }
     }
 }
+
+template <typename Ordering>
+bool IsGroebnerBasis(const std::vector<Polynomial<Ordering>>& system) {
+    for (size_t i = 0; i < system.size(); ++i) {
+        for (size_t j = i + 1; j < system.size(); ++j) {
+            Polynomial s = CalcSPolynomial(system[i], system[j]);
+            ReducePolynomialBySystem(s, system);
+            if (!s.IsZero()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 }  // namespace gb

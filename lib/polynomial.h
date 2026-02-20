@@ -36,6 +36,10 @@ public:
     Polynomial& operator=(Polynomial&&) noexcept = default;
     ~Polynomial() = default;
 
+    bool IsZero() const {
+        return terms_.empty();
+    }
+
     const TermsContainer& GetTerms() const {
         return terms_;
     }
