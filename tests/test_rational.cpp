@@ -1,36 +1,37 @@
 #include <gtest/gtest.h>
+#include <limits>
 #include "rational.h"
 
 using gb::Rational;
 
 TEST(RationalTest, Constructors) {
     Rational r;
-    EXPECT_EQ(r.GetNumerator(), 0);
-    EXPECT_EQ(r.GetDenominator(), 1);
+    EXPECT_EQ(r.Numerator(), 0);
+    EXPECT_EQ(r.Denominator(), 1);
 
     r = Rational(123456);
-    EXPECT_EQ(r.GetNumerator(), 123456);
-    EXPECT_EQ(r.GetDenominator(), 1);
+    EXPECT_EQ(r.Numerator(), 123456);
+    EXPECT_EQ(r.Denominator(), 1);
 
     r = Rational(1'000'000'007, 999'999'937);
-    EXPECT_EQ(r.GetNumerator(), 1'000'000'007);
-    EXPECT_EQ(r.GetDenominator(), 999'999'937);
+    EXPECT_EQ(r.Numerator(), 1'000'000'007);
+    EXPECT_EQ(r.Denominator(), 999'999'937);
 
     r = Rational(12, 50);
-    EXPECT_EQ(r.GetNumerator(), 6);
-    EXPECT_EQ(r.GetDenominator(), 25);
+    EXPECT_EQ(r.Numerator(), 6);
+    EXPECT_EQ(r.Denominator(), 25);
 
     r = Rational(-100, -4);
-    EXPECT_EQ(r.GetNumerator(), 25);
-    EXPECT_EQ(r.GetDenominator(), 1);
+    EXPECT_EQ(r.Numerator(), 25);
+    EXPECT_EQ(r.Denominator(), 1);
 
     r = Rational(100, -4);
-    EXPECT_EQ(r.GetNumerator(), -25);
-    EXPECT_EQ(r.GetDenominator(), 1);
+    EXPECT_EQ(r.Numerator(), -25);
+    EXPECT_EQ(r.Denominator(), 1);
 
     r = Rational(-100, 4);
-    EXPECT_EQ(r.GetNumerator(), -25);
-    EXPECT_EQ(r.GetDenominator(), 1);
+    EXPECT_EQ(r.Numerator(), -25);
+    EXPECT_EQ(r.Denominator(), 1);
 }
 
 TEST(RationalTest, Comparison) {
@@ -64,4 +65,16 @@ TEST(RationalTest, Arithmetics) {
 
     r = Rational(199933, 3085553);
     EXPECT_EQ(r / r, 1);
+}
+
+TEST(RationalTest, Overflow) {
+    auto max = std::numeric_limits<Rational::Numeric>::max();
+    Rational a(13337, max);
+    Rational b(1415891345, max);
+
+    EXPECT_LT(a, b);
+
+    Rational c = a + b;
+    EXPECT_EQ(c.Denominator(), max);
+    EXPECT_EQ(c.Numerator(), a.Numerator() + b.Numerator());
 }

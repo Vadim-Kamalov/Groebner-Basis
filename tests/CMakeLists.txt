@@ -2,6 +2,7 @@ add_executable(run_tests)
 
 target_sources(run_tests PRIVATE
     test_rational.cpp
+    test_prime_field.cpp
     test_monomial.cpp
     test_term.cpp
     test_orderings.cpp

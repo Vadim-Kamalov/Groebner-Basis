@@ -11,14 +11,8 @@ public:
     Rational(Numeric num);
     Rational(Numeric numerator, Numeric denominator);
 
-    Rational(const Rational&) = default;
-    Rational(Rational&&) = default;
-    Rational& operator=(const Rational&) = default;
-    Rational& operator=(Rational&&) noexcept = default;
-    ~Rational() = default;
-
-    Numeric GetNumerator() const;
-    Numeric GetDenominator() const;
+    Numeric Numerator() const;
+    Numeric Denominator() const;
 
     Rational& operator+=(const Rational& other);
     Rational& operator-=(const Rational& other);

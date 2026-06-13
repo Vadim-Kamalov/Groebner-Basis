@@ -9,38 +9,30 @@ Rational::Rational(Numeric num) : Rational(num, 1) {
 
 Rational::Rational(Numeric numerator, Numeric denominator)
     : numerator_(numerator), denominator_(denominator) {
+    assert(denominator != 0);
     Normalize();
 }
 
-Rational::Numeric Rational::GetNumerator() const {
+Rational::Numeric Rational::Numerator() const {
     return numerator_;
 }
 
-Rational::Numeric Rational::GetDenominator() const {
+Rational::Numeric Rational::Denominator() const {
     return denominator_;
 }
 
-void Rational::Normalize() {
-    Numeric gcd = std::gcd(numerator_, denominator_);
-    numerator_ /= gcd;
-    denominator_ /= gcd;
-
-    if (denominator_ < 0) {
-        numerator_ *= -1;
-        denominator_ *= -1;
-    }
-}
-
 Rational& Rational::operator+=(const Rational& other) {
-    numerator_ = numerator_ * other.denominator_ + other.numerator_ * denominator_;
-    denominator_ *= other.denominator_;
+    Numeric lcm = std::lcm(denominator_, other.denominator_);
+    numerator_ = numerator_ * (lcm / denominator_) + other.numerator_ * (lcm / other.denominator_);
+    denominator_ = lcm;
     Normalize();
     return *this;
 }
 
 Rational& Rational::operator-=(const Rational& other) {
-    numerator_ = numerator_ * other.denominator_ - other.numerator_ * denominator_;
-    denominator_ *= other.denominator_;
+    Numeric lcm = std::lcm(denominator_, other.denominator_);
+    numerator_ = numerator_ * (lcm / denominator_) - other.numerator_ * (lcm / other.denominator_);
+    denominator_ = lcm;
     Normalize();
     return *this;
 }
@@ -73,7 +65,8 @@ bool operator!=(const Rational& lhs, const Rational& rhs) {
 }
 
 bool operator<(const Rational& lhs, const Rational& rhs) {
-    return lhs.numerator_ * rhs.denominator_ < rhs.numerator_ * lhs.denominator_;
+    Rational::Numeric lcm = std::lcm(lhs.denominator_, rhs.denominator_);
+    return lhs.numerator_ * (lcm / lhs.denominator_) < rhs.numerator_ * (lcm / rhs.denominator_);
 }
 
 bool operator>(const Rational& lhs, const Rational& rhs) {
@@ -112,4 +105,14 @@ Rational operator/(const Rational& lhs, const Rational& rhs) {
     return tmp;
 }
 
+void Rational::Normalize() {
+    Numeric gcd = std::gcd(numerator_, denominator_);
+    numerator_ /= gcd;
+    denominator_ /= gcd;
+
+    if (denominator_ < 0) {
+        numerator_ *= -1;
+        denominator_ *= -1;
+    }
+}
 }  // namespace gb
