@@ -1,44 +1,135 @@
 #pragma once
 
-#include "term.h"
+#include <algorithm>
+#include "monomial.h"
 #include "polynomial.h"
 
 namespace gb {
-Term LCM(const Term& lhs, const Term& rhs);
 
-template <typename Ordering>
-Polynomial<Ordering> CalcSPolynomial(const Polynomial<Ordering>& f, const Polynomial<Ordering>& g) {
-    Term lcm = LCM(f.GetLeadingTerm(), g.GetLeadingTerm());
-    Polynomial s = (lcm / f.GetLeadingTerm()) * f - (lcm / g.GetLeadingTerm()) * g;
-    return s;
-}
+Monomial LCM(const Monomial& lhs, const Monomial& rhs);
 
-template <typename Ordering>
-void ReducePolynomialBySystem(Polynomial<Ordering>& to_reduce,
-                              const std::vector<Polynomial<Ordering>>& system) {
-    bool reduced = true;
-    while (reduced) {
-        reduced = false;
-        for (const Polynomial<Ordering>& polynomial : system) {
-            if (to_reduce.Reduce(polynomial)) {
-                reduced = true;
+template <typename CoeffT, typename Ordering>
+class Algorithm {
+public:
+    using Polynomial = Polynomial<CoeffT, Ordering>;
+    using Set = std::vector<Polynomial>;
+
+    static Polynomial SPolynomial(const Polynomial& f, const Polynomial& g) {
+        Term lcm = LCM(f.LeadingMonomial(), g.LeadingMonomial());
+        Polynomial s = (lcm / f.LeadingTerm()) * f - (lcm / g.LeadingTerm()) * g;
+        return s;
+    }
+
+    enum class Status : uint8_t { NoReduction, ReducedOnce };
+
+    static Status ReduceOnce(const Polynomial& reduce_by, Polynomial* to_reduce) {
+        assert(to_reduce != nullptr);
+        if (reduce_by.IsZero()) {
+            return Status::NoReduction;
+        }
+        const Monomial& lead_monomial = reduce_by.LeadingMonomial();
+        for (auto it = to_reduce->Begin(); it != to_reduce->End(); ++it) {
+            if (it.Monomial().IsDivisibleBy(lead_monomial)) {
+                *to_reduce -= (*it / reduce_by.LeadingTerm()) * reduce_by;
+                return Status::ReducedOnce;
             }
         }
+        return Status::NoReduction;
     }
-}
 
-template <typename Ordering>
-bool IsGroebnerBasis(const std::vector<Polynomial<Ordering>>& system) {
-    for (size_t i = 0; i < system.size(); ++i) {
-        for (size_t j = i + 1; j < system.size(); ++j) {
-            Polynomial s = CalcSPolynomial(system[i], system[j]);
-            ReducePolynomialBySystem(s, system);
-            if (!s.IsZero()) {
-                return false;
+    template <typename Iterator>
+    static Status ReduceOnceBy(Iterator begin, Iterator end, Polynomial* to_reduce) {
+        assert(to_reduce != nullptr);
+        for (Iterator it = begin; it != end; ++it) {
+            if (ReduceOnce(*it, to_reduce) == Status::ReducedOnce) {
+                return Status::ReducedOnce;
             }
         }
+        return Status::NoReduction;
     }
-    return true;
-}
+
+    template <typename Iterator>
+    static void ReduceBy(Iterator begin, Iterator end, Polynomial* to_reduce) {
+        assert(to_reduce != nullptr);
+        Status status = Status::NoReduction;
+        do {
+            status = ReduceOnceBy(begin, end, to_reduce);
+        } while (status == Status::ReducedOnce);
+    }
+
+    static Status ReduceOnceBy(const Set& set, Polynomial* to_reduce) {
+        return ReduceOnceBy(set.begin(), set.end(), to_reduce);
+    }
+
+    static void ReduceBy(const Set& set, Polynomial* to_reduce) {
+        return ReduceBy(set.begin(), set.end(), to_reduce);
+    }
+
+    static bool IsGroebnerBasis(const Set& set) {
+        for (size_t i = 0; i < set.size(); ++i) {
+            for (size_t j = i + 1; j < set.size(); ++j) {
+                Polynomial s = SPolynomial(set[i], set[j]);
+                ReduceBy(set, &s);
+                if (!s.IsZero()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    template <typename Iterator>
+    static void SortSetByMonomials(Iterator begin, Iterator end) {
+        std::sort(begin, end, [](const Polynomial& left, const Polynomial& right) {
+            return Ordering()(left.LeadingMonomial(), right.LeadingMonomial());
+        });
+    }
+
+    static Set ReduceBasis(Set basis) {
+        assert(IsGroebnerBasis(basis));
+
+        for (auto& p : basis) {
+            p.Normalize();
+        }
+
+        for (size_t i = 0; i < basis.size(); ++i) {
+            ReduceByExcept(basis, i, &basis[i]);
+
+            if (!basis[i].IsZero()) {
+                basis[i].Normalize();
+            }
+        }
+
+        basis.erase(std::remove_if(basis.begin(), basis.end(),
+                                   [](const Polynomial& p) { return p.IsZero(); }),
+                    basis.end());
+
+        SortSetByMonomials(basis.begin(), basis.end());
+
+        return basis;
+    }
+
+private:
+    static Status ReduceOnceByExcept(const Set& set, size_t except, Polynomial* to_reduce) {
+        assert(to_reduce != nullptr);
+        for (size_t i = 0; i != set.size(); ++i) {
+            if (i == except) {
+                continue;
+            }
+            if (ReduceOnce(set[i], to_reduce) == Status::ReducedOnce) {
+                return Status::ReducedOnce;
+            }
+        }
+        return Status::NoReduction;
+    }
+
+    static void ReduceByExcept(const Set& set, size_t except, Polynomial* to_reduce) {
+        assert(to_reduce != nullptr);
+        Status status = Status::NoReduction;
+        do {
+            status = ReduceOnceByExcept(set, except, to_reduce);
+        } while (status == Status::ReducedOnce);
+    }
+};
 
 }  // namespace gb

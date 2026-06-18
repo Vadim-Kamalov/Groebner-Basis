@@ -8,6 +8,8 @@ target_sources(run_tests PRIVATE
     test_orderings.cpp
     test_polynomial.cpp
     test_algo.cpp
+    test_cyclic.cpp
+    random.cpp
 )
 
 target_include_directories(run_tests PRIVATE

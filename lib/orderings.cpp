@@ -4,33 +4,40 @@
 
 namespace gb {
 bool LexOrder::operator()(const Monomial& lhs, const Monomial& rhs) const {
-    size_t max_size = std::max(lhs.GetSize(), rhs.GetSize());
+    size_t max_size = std::max(lhs.Degrees().size(), rhs.Degrees().size());
     for (size_t i = 0; i < max_size; ++i) {
-        if (lhs.GetDegree(i) == rhs.GetDegree(i)) {
+        if (lhs.DegreeOf(i) == rhs.DegreeOf(i)) {
             continue;
         }
-        return lhs.GetDegree(i) > rhs.GetDegree(i);
+        return lhs.DegreeOf(i) > rhs.DegreeOf(i);
     }
     return false;
 }
 
-bool LexOrder::operator()(const Term& lhs, const Term& rhs) const {
-    assert(lhs.GetCoeff() != 0);
-    assert(rhs.GetCoeff() != 0);
-    return LexOrder::operator()(lhs.GetMonomial(), rhs.GetMonomial());
-}
-
 bool GrlexOrder::operator()(const Monomial& lhs, const Monomial& rhs) const {
-    Monomial::Degree lhs_sum = std::accumulate(lhs.GetDegrees().begin(), lhs.GetDegrees().end(), 0);
-    Monomial::Degree rhs_sum = std::accumulate(rhs.GetDegrees().begin(), rhs.GetDegrees().end(), 0);
+    Monomial::Degree lhs_sum = lhs.DegreeSum();
+    Monomial::Degree rhs_sum = rhs.DegreeSum();
 
     return (lhs_sum > rhs_sum) || (lhs_sum == rhs_sum && LexOrder()(lhs, rhs));
 }
 
-bool GrlexOrder::operator()(const Term& lhs, const Term& rhs) const {
-    assert(lhs.GetCoeff() != 0);
-    assert(rhs.GetCoeff() != 0);
-    return GrlexOrder::operator()(lhs.GetMonomial(), rhs.GetMonomial());
+bool GrevlexOrder::operator()(const Monomial& lhs, const Monomial& rhs) const {
+    Monomial::Degree lhs_sum = lhs.DegreeSum();
+    Monomial::Degree rhs_sum = rhs.DegreeSum();
+
+    if (lhs_sum != rhs_sum) {
+        return lhs_sum > rhs_sum;
+    }
+
+    size_t max_size = std::max(lhs.Degrees().size(), rhs.Degrees().size());
+    for (size_t i = max_size; i > 0; --i) {
+        if (lhs.DegreeOf(i - 1) == rhs.DegreeOf(i - 1)) {
+            continue;
+        }
+        return lhs.DegreeOf(i - 1) < rhs.DegreeOf(i - 1);
+    }
+
+    return false;
 }
 
 }  // namespace gb

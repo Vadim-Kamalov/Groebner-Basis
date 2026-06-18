@@ -13,15 +13,9 @@ public:
     Monomial(const std::vector<Degree>& degrees);
     Monomial(std::vector<Degree>&& degrees);
 
-    Monomial(const Monomial&) = default;
-    Monomial(Monomial&&) = default;
-    Monomial& operator=(const Monomial&) = default;
-    Monomial& operator=(Monomial&&) noexcept = default;
-    ~Monomial() = default;
-
-    size_t GetSize() const;
-    Degree GetDegree(size_t index) const;
-    const std::vector<Degree>& GetDegrees() const;
+    Degree DegreeSum() const;
+    Degree DegreeOf(size_t index) const;
+    const std::vector<Degree>& Degrees() const;
     bool IsDivisibleBy(const Monomial& other) const;
 
     Monomial& operator*=(const Monomial& other);
@@ -30,10 +24,12 @@ public:
     friend Monomial operator*(const Monomial& lhs, const Monomial& rhs);
     friend Monomial operator/(const Monomial& lhs, const Monomial& rhs);
 
-    friend bool operator==(const Monomial& lhs, const Monomial& rhs);
-    friend bool operator!=(const Monomial& lhs, const Monomial& rhs);
+    friend bool operator==(const Monomial& lhs, const Monomial& rhs) = default;
 
 private:
+    void Normalize();
+
     std::vector<Degree> degrees_;
+    Degree degree_sum_ = 0;
 };
 }  // namespace gb

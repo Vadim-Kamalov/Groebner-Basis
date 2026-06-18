@@ -1,33 +1,42 @@
 #include "monomial.h"
 #include <cassert>
+#include <numeric>
 
 namespace gb {
 Monomial::Monomial(std::initializer_list<Degree> degrees) : degrees_(degrees) {
+    Normalize();
+    degree_sum_ = std::accumulate(degrees_.begin(), degrees_.end(), Degree{0});
 }
 Monomial::Monomial(const std::vector<Degree>& degrees) : degrees_(degrees) {
+    Normalize();
+    degree_sum_ = std::accumulate(degrees_.begin(), degrees_.end(), Degree{0});
 }
 Monomial::Monomial(std::vector<Degree>&& degrees) : degrees_(std::move(degrees)) {
+    Normalize();
+    degree_sum_ = std::accumulate(degrees_.begin(), degrees_.end(), Degree{0});
 }
 
-size_t Monomial::GetSize() const {
-    return degrees_.size();
+Monomial::Degree Monomial::DegreeSum() const {
+    return degree_sum_;
 }
 
-Monomial::Degree Monomial::GetDegree(size_t index) const {
+Monomial::Degree Monomial::DegreeOf(size_t index) const {
     if (index < degrees_.size()) {
         return degrees_[index];
     }
     return 0;
 }
 
-const std::vector<Monomial::Degree>& Monomial::GetDegrees() const {
+const std::vector<Monomial::Degree>& Monomial::Degrees() const {
     return degrees_;
 }
 
 bool Monomial::IsDivisibleBy(const Monomial& other) const {
-    size_t max_size = std::max(degrees_.size(), other.degrees_.size());
-    for (size_t i = 0; i < max_size; ++i) {
-        if (GetDegree(i) < other.GetDegree(i)) {
+    if (degrees_.size() < other.degrees_.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < other.degrees_.size(); ++i) {
+        if (degrees_[i] < other.degrees_[i]) {
             return false;
         }
     }
@@ -39,19 +48,19 @@ Monomial& Monomial::operator*=(const Monomial& other) {
         degrees_.resize(other.degrees_.size());
     }
     for (size_t i = 0; i < degrees_.size(); ++i) {
-        degrees_[i] += other.GetDegree(i);
+        degrees_[i] += other.DegreeOf(i);
+        degree_sum_ += other.DegreeOf(i);
     }
     return *this;
 }
 
 Monomial& Monomial::operator/=(const Monomial& other) {
     assert(IsDivisibleBy(other));
-    if (degrees_.size() < other.degrees_.size()) {
-        degrees_.resize(other.degrees_.size());
+    for (size_t i = 0; i < other.degrees_.size(); ++i) {
+        degrees_[i] -= other.DegreeOf(i);
+        degree_sum_ -= other.DegreeOf(i);
     }
-    for (size_t i = 0; i < degrees_.size(); ++i) {
-        degrees_[i] -= other.GetDegree(i);
-    }
+    Normalize();
     return *this;
 }
 
@@ -67,17 +76,17 @@ Monomial operator/(const Monomial& lhs, const Monomial& rhs) {
     return tmp;
 }
 
-bool operator==(const Monomial& lhs, const Monomial& rhs) {
-    size_t max_size = std::max(lhs.degrees_.size(), rhs.degrees_.size());
-    for (size_t i = 0; i < max_size; ++i) {
-        if (lhs.GetDegree(i) != rhs.GetDegree(i)) {
-            return false;
-        }
+void Monomial::Normalize() {
+    if (degrees_.empty()) {
+        return;
     }
-    return true;
+
+    size_t new_size = degrees_.size();
+    while (new_size > 0 && degrees_[new_size - 1] == 0) {
+        --new_size;
+    }
+
+    degrees_.resize(new_size);
 }
 
-bool operator!=(const Monomial& lhs, const Monomial& rhs) {
-    return !(lhs == rhs);
-}
 }  // namespace gb

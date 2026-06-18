@@ -32,6 +32,8 @@ TEST(RationalTest, Constructors) {
     r = Rational(-100, 4);
     EXPECT_EQ(r.Numerator(), -25);
     EXPECT_EQ(r.Denominator(), 1);
+
+    EXPECT_EQ(-r, Rational(100, 4));
 }
 
 TEST(RationalTest, Comparison) {
