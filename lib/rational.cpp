@@ -115,4 +115,14 @@ void Rational::Normalize() {
         denominator_ *= -1;
     }
 }
+
+std::ostream& operator<<(std::ostream& os, const Rational& r) {
+    if (r.Denominator() == 1) {
+        os << r.Numerator();
+    } else {
+        os << r.Numerator() << "/" << r.Denominator();
+    }
+    return os;
+}
+
 }  // namespace gb

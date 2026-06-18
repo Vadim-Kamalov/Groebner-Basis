@@ -299,4 +299,37 @@ private:
 
     TermsContainer terms_;
 };
+
+template <typename CoeffT, typename Ordering>
+std::ostream& operator<<(std::ostream& os, const Polynomial<CoeffT, Ordering>& p) {
+    if (p.IsZero()) {
+        return os << '0';
+    }
+
+    for (auto it = p.Begin(); it != p.End(); ++it) {
+        if (it != p.Begin()) {
+            if (it.Coeff() < 0) {
+                os << " - ";
+            } else {
+                os << " + ";
+            }
+        }
+        if (it.Coeff() == 1) {
+            os << it.Monomial();
+            continue;
+        }
+        if (it.Coeff() == -1) {
+            os << it.Monomial();
+            continue;
+        }
+
+        if (it.Coeff() < 0) {
+            os << -it.Coeff() << it.Monomial();
+        } else {
+            os << it.Coeff() << it.Monomial();
+        }
+    }
+
+    return os;
+}
 }  // namespace gb

@@ -6,8 +6,8 @@ namespace gb {
 template <typename CoeffT, typename Ordering>
 class Buchberger {
 public:
-    using Polynomial = Polynomial<CoeffT, Ordering>;
-    using Set = std::vector<Polynomial>;
+    using Poly = Polynomial<CoeffT, Ordering>;
+    using Set = std::vector<Poly>;
     using Algo = Algorithm<CoeffT, Ordering>;
     using Index = size_t;
     using Queue = std::queue<std::pair<Index, Index>>;

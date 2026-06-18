@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <ostream>
 #include <vector>
 
 namespace gb {
@@ -32,4 +33,6 @@ private:
     std::vector<Degree> degrees_;
     Degree degree_sum_ = 0;
 };
+
+std::ostream& operator<<(std::ostream& os, const Monomial& m);
 }  // namespace gb

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <ostream>
 
 namespace gb {
 class Rational {
@@ -39,4 +40,6 @@ private:
     Numeric numerator_{0};
     Numeric denominator_{1};
 };
+
+std::ostream& operator<<(std::ostream& os, const Rational& r);
 }  // namespace gb

@@ -11,18 +11,18 @@ Monomial LCM(const Monomial& lhs, const Monomial& rhs);
 template <typename CoeffT, typename Ordering>
 class Algorithm {
 public:
-    using Polynomial = Polynomial<CoeffT, Ordering>;
-    using Set = std::vector<Polynomial>;
+    using Poly = Polynomial<CoeffT, Ordering>;
+    using Set = std::vector<Poly>;
 
-    static Polynomial SPolynomial(const Polynomial& f, const Polynomial& g) {
+    static Poly SPolynomial(const Poly& f, const Poly& g) {
         Term lcm = LCM(f.LeadingMonomial(), g.LeadingMonomial());
-        Polynomial s = (lcm / f.LeadingTerm()) * f - (lcm / g.LeadingTerm()) * g;
+        Poly s = (lcm / f.LeadingTerm()) * f - (lcm / g.LeadingTerm()) * g;
         return s;
     }
 
     enum class Status : uint8_t { NoReduction, ReducedOnce };
 
-    static Status ReduceOnce(const Polynomial& reduce_by, Polynomial* to_reduce) {
+    static Status ReduceOnce(const Poly& reduce_by, Poly* to_reduce) {
         assert(to_reduce != nullptr);
         if (reduce_by.IsZero()) {
             return Status::NoReduction;
@@ -38,7 +38,7 @@ public:
     }
 
     template <typename Iterator>
-    static Status ReduceOnceBy(Iterator begin, Iterator end, Polynomial* to_reduce) {
+    static Status ReduceOnceBy(Iterator begin, Iterator end, Poly* to_reduce) {
         assert(to_reduce != nullptr);
         for (Iterator it = begin; it != end; ++it) {
             if (ReduceOnce(*it, to_reduce) == Status::ReducedOnce) {
@@ -49,7 +49,7 @@ public:
     }
 
     template <typename Iterator>
-    static void ReduceBy(Iterator begin, Iterator end, Polynomial* to_reduce) {
+    static void ReduceBy(Iterator begin, Iterator end, Poly* to_reduce) {
         assert(to_reduce != nullptr);
         Status status = Status::NoReduction;
         do {
@@ -57,18 +57,18 @@ public:
         } while (status == Status::ReducedOnce);
     }
 
-    static Status ReduceOnceBy(const Set& set, Polynomial* to_reduce) {
+    static Status ReduceOnceBy(const Set& set, Poly* to_reduce) {
         return ReduceOnceBy(set.begin(), set.end(), to_reduce);
     }
 
-    static void ReduceBy(const Set& set, Polynomial* to_reduce) {
+    static void ReduceBy(const Set& set, Poly* to_reduce) {
         return ReduceBy(set.begin(), set.end(), to_reduce);
     }
 
     static bool IsGroebnerBasis(const Set& set) {
         for (size_t i = 0; i < set.size(); ++i) {
             for (size_t j = i + 1; j < set.size(); ++j) {
-                Polynomial s = SPolynomial(set[i], set[j]);
+                Poly s = SPolynomial(set[i], set[j]);
                 ReduceBy(set, &s);
                 if (!s.IsZero()) {
                     return false;
@@ -80,7 +80,7 @@ public:
 
     template <typename Iterator>
     static void SortSetByMonomials(Iterator begin, Iterator end) {
-        std::sort(begin, end, [](const Polynomial& left, const Polynomial& right) {
+        std::sort(begin, end, [](const Poly& left, const Poly& right) {
             return Ordering()(left.LeadingMonomial(), right.LeadingMonomial());
         });
     }
@@ -100,9 +100,9 @@ public:
             }
         }
 
-        basis.erase(std::remove_if(basis.begin(), basis.end(),
-                                   [](const Polynomial& p) { return p.IsZero(); }),
-                    basis.end());
+        basis.erase(
+            std::remove_if(basis.begin(), basis.end(), [](const Poly& p) { return p.IsZero(); }),
+            basis.end());
 
         SortSetByMonomials(basis.begin(), basis.end());
 
@@ -110,7 +110,7 @@ public:
     }
 
 private:
-    static Status ReduceOnceByExcept(const Set& set, size_t except, Polynomial* to_reduce) {
+    static Status ReduceOnceByExcept(const Set& set, size_t except, Poly* to_reduce) {
         assert(to_reduce != nullptr);
         for (size_t i = 0; i != set.size(); ++i) {
             if (i == except) {
@@ -123,7 +123,7 @@ private:
         return Status::NoReduction;
     }
 
-    static void ReduceByExcept(const Set& set, size_t except, Polynomial* to_reduce) {
+    static void ReduceByExcept(const Set& set, size_t except, Poly* to_reduce) {
         assert(to_reduce != nullptr);
         Status status = Status::NoReduction;
         do {

@@ -89,4 +89,25 @@ void Monomial::Normalize() {
     degrees_.resize(new_size);
 }
 
+std::ostream& operator<<(std::ostream& os, const Monomial& m) {
+    const std::vector<Monomial::Degree>& degrees = m.Degrees();
+
+    bool first_print = true;
+    for (size_t i = 0; i != degrees.size(); ++i) {
+        if (degrees[i] == 0) {
+            continue;
+        }
+        if (!first_print) {
+            os << ' ';
+        }
+        os << "x_" << (i + 1);
+        if (degrees[i] > 1) {
+            os << '^' << degrees[i];
+        }
+        first_print = false;
+    }
+
+    return os;
+}
+
 }  // namespace gb

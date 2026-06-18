@@ -22,3 +22,5 @@ make -j$(nproc)
 ./tests/run_tests
 ```
 Библиотека собирается как статическая в `/lib/libgroebner_basis_lib.a`
+
+Примеры работы с библиотекой можно посмотреть в [examples](examples)

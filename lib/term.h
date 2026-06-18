@@ -69,4 +69,23 @@ private:
     Coefficient coeff_{};
     MonomialT monomial_;
 };
+
+template <typename Coefficient>
+std::ostream& operator<<(std::ostream& os, const Term<Coefficient>& t) {
+    const Coefficient& coeff = t.Coeff();
+    const Monomial& monom = t.Monomial();
+
+    if (monom.Degrees().empty()) {
+        return os << coeff;
+    }
+
+    if (coeff == 1) {
+        return os << monom;
+    }
+    if (coeff == -1) {
+        return os << '-' << monom;
+    }
+    return os << coeff << monom;
+}
+
 }  // namespace gb
