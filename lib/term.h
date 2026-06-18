@@ -30,9 +30,6 @@ public:
     Coefficient Coeff() const {
         return coeff_;
     }
-    Coefficient& Coeff() {
-        return coeff_;
-    }
     const MonomialT& Monomial() const {
         return monomial_;
     }
