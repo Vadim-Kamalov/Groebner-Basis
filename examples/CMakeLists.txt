@@ -1,0 +1,11 @@
+add_executable(is_groebner_basis is_groebner_basis.cpp)
+target_link_libraries(is_groebner_basis PRIVATE groebner_basis_lib)
+target_include_directories(is_groebner_basis PRIVATE ${CMAKE_SOURCE_DIR}/lib)
+
+add_executable(find_remainder find_remainder.cpp)
+target_link_libraries(find_remainder PRIVATE groebner_basis_lib)
+target_include_directories(find_remainder PRIVATE ${CMAKE_SOURCE_DIR}/lib)
+
+add_executable(find_groebner_basis find_groebner_basis.cpp)
+target_link_libraries(find_groebner_basis PRIVATE groebner_basis_lib)
+target_include_directories(find_groebner_basis PRIVATE ${CMAKE_SOURCE_DIR}/lib)
